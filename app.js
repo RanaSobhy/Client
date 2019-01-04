@@ -11,32 +11,29 @@ const result = excelToJson({
 const books = result["books"];
 const authors = result["authors"];
 
-// var book = {};
-// book[books[0][0]] = books[1][0];
-// book[books[0][1]] = books[1][1];
-// book[books[0][2]] = books[1][2];
-// book[books[0][3]] = books[1][3];
-// book[books[0][4]] = books[1][4];
-// book[books[0][5]] = books[1][5];
-// book[books[0][6]] = books[1][6];
-// book[books[0][7]] = books[1][7];
+( async  () => {
+    for (var i = 1; i < books.length; i++) {
+        try{
+            var booksAuthor = authors.find(a=> a.name === books[i].author);
+            var author = await axios
+            .put("http://localhost:3000/api/authors", booksAuthor);
 
-// console.log(book);
+            var category = await axios
+            .put("http://localhost:3000/api/categories", {
+            name: books[i].category
+            });
 
-// for (var i = 1; i < books.length; i++) {
+            books[i].author = author.data.response.id;
+            books[i].category = category.data.response.id;
 
-//   axios
-//     .put("http://localhost:3000/api/categories", {
-//       name: books[i].category
-//     })
-//     .then(function(response) {
-//       console.log(response.status);
-//       console.log(response.data);
-//     })
-//     .catch(function(error) {
-//       errorHandler({
-//         status: error.response.status,
-//         message: error.response.data.response
-//       });
-//     });
-// }
+            var book = await axios
+            .put("http://localhost:3000/api/books", books[i]);
+
+            console.log(book.data);
+        }
+        catch(error){
+            error.response.data.row = i;
+            errorHandler(error.response.data);
+        }
+    }
+})();
